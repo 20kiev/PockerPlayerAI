@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import numpy as np 
 
 RoyalFlushVal = 1000
 StraightFlushVal = 900
@@ -25,17 +26,106 @@ Deck = np.array(["2h", "2d", "2c", "2s",
                 "Kh", "Kd", "Kc", "Ks", 
                 "Ah", "Ad", "Ac", "As"])
 
-NilHand = np.array(["", ""])
-roundCards = np.array(["", "", "", "", ""])
+NilHand = np.array(["  ", "  "])
+RoundCards = np.array(["  ", "  ", "  ", "  ", "  "])
+def GetCardId(Card):
+	for i in range(len(Deck)):
+		if Card == Deck[i]:
+			return i
+
+
+
 def WinResult(Hand1, Hand2, Hand3 = NilHand, Hand4 = NilHand, Hand5 = NilHand, Hand6 = NilHand, Hand7 = NilHand, Hand8 = NilHand, Hand9 = NilHand):
+	hvMax = getHandValue(Hand1)
+	hid = 1
 
+	hvTmp = getHandValue(Hand2)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 2
 
+	hvTmp = getHandValue(Hand3)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 3
+	hvTmp = getHandValue(Hand4)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 4
 
+	hvTmp = getHandValue(Hand5)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 5
+
+	hvTmp = getHandValue(Hand6)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 6
+
+	hvTmp = getHandValue(Hand7)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 7
+
+	hvTmp = getHandValue(Hand8)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 8
+
+	hvTmp = getHandValue(Hand9)
+	if hvMax < hvTmp:
+		hvMax = hvTmp
+		hid = 9
+
+	return hid
 
 def getHandValue(Hand):
+	if Hand[0] != NilHand[0]:
+		HandVal = np.array([getCardVal(Hand[0]), getCardVal(Hand[1]), getCardVal(RoundCards[0]), getCardVal(RoundCards[1]), getCardVal(RoundCards[2]), getCardVal(RoundCards[3]), getCardVal(RoundCards[4])])
+		HandType = np.array([getCardType(Hand[0]), getCardType(Hand[1]), getCardType(RoundCards[0]), getCardType(RoundCards[1]), getCardType(RoundCards[2]), getCardType(RoundCards[3]), getCardType(RoundCards[4])])
 
+		v = RoyalFlush(HandVal, HandType)
+		if v != 0:
+			return v
 
+		v = StraightFlush(HandVal, HandType)
+		if v != 0:
+			return v
 
+		v = Four(HandVal)
+		if v != 0:
+			return v
+
+		v = FullHouse(HandVal)
+		if v != 0:
+			return v
+
+		v = Flush(HandVal, HandType)
+		if v != 0:
+			return v
+		
+		v = Straight(HandVal)
+		if v != 0:
+			return v
+
+		v = Three(HandVal)
+		if v != 0:
+			return v
+
+		v = TwoPairs(HandVal)
+		if v != 0:
+			return v
+
+		v = Pair(HandVal)
+		if v != 0:
+			return v
+
+		v = Hight(HandVal)
+		if v != 0:
+			return v
+
+	return 0
 
 def getCardVal(Card):
 	res = {
@@ -85,7 +175,7 @@ def Pair(HandVal):
 		for c2 in range(len(HandVal)):
 			if HandVal[c1] == HandVal[c2]:
 				f += 1
-			if f = 2:
+			if f == 2:
 				res = PairVal + HandVal[c1]
 				break
 		if res != 0:
@@ -101,7 +191,7 @@ def TwoPairs(HandVal):
 			for c2 in range(len(HandVal)):
 				if HandVal[c1] == HandVal[c2] and HandVal[c1] != pair:
 					f += 1
-				if f = 2:
+				if f == 2:
 					if HandVal[c1] > pair:
 						res = TwoPairsVal + HandVal[c1]
 					else:
@@ -118,7 +208,7 @@ def Three(HandVal):
 		for c2 in range(len(HandVal)):
 			if HandVal[c1] == HandVal[c2]:
 				f += 1
-			if f = 3:
+			if f == 3:
 				res = ThreeVal + HandVal[c1]
 				break
 		if res != 0:
@@ -135,11 +225,13 @@ def Straight(HandVal):
 		if HandVal[c+1] - HandVal[c] == 1:
 			f += 1
 			hc = HandVal[c+1]
-		else:
+		elif HandVal[c+1] - HandVal[c] == 0:
+			continue
+		elif HandVal[c+1] - HandVal[c] > 1:
 			f = 0
-		if f == 4:
-			res = StraightVal + hc
-			break
+	if f >= 4:
+		res = StraightVal + hc
+
 	return res
 
 def Flush(HandVal, HandType):
@@ -150,22 +242,19 @@ def Flush(HandVal, HandType):
 		for c2 in range(len(HandType)):
 			if HandType[c1] == HandType[c2]:
 				f += 1
-				if HandVal[c1] > HandVal[c2]:
-					hc = 
+				if HandVal[c1] > hc:
+					hc = HandVal[c1]
+	if f >= 5:
+		res = FlushVal + hc
 
-			if f = 5:
-				res = FlushVal + HandType[c1]
-				break
-		if res != 0:
-			break
 	return res
 
 def FullHouse(HandVal):
 	res = 0
 	three = Three(HandVal)
 	pair =  Pair(HandVal)
-	if three != 0 and pair != 0 and (there - ThreeVal) != (pair - PairVal):
-		res = FullHouse + there - ThreeVal
+	if three != 0 and pair != 0 and (three - ThreeVal) != (pair - PairVal):
+		res = FullHouseVal + three - ThreeVal
 
 	return res
 
@@ -176,7 +265,7 @@ def Four(HandVal):
 		for c2 in range(len(HandVal)):
 			if HandVal[c1] == HandVal[c2]:
 				f += 1
-			if f = 4:
+			if f == 4:
 				res = FourVal + HandVal[c1]
 				break
 		if res != 0:
@@ -185,36 +274,28 @@ def Four(HandVal):
 
 def StraightFlush(HandVal, HandType):
 	res = 0
-	if HandType[0] == HandType[1] == HandType[2] == HandType[3] == HandType[4]:
-		val = Straight(HandVal)
-		if val != 0:
-			res = StraightFlushVal + val - StraightVal
+	copyHand = sorted(np.copy(HandVal))
+	f = 0
+	hc = 0
+	for c in range(len(HandVal)-1): 
+		if (HandVal[c+1] - HandVal[c]) == 1 and HandType[c+1] == HandType[c]:
+			f += 1
+			hc = HandVal[c+1]
+		elif (HandVal[c+1] - HandVal[c]) == 0 and HandType[c+1] == HandType[c]:
+			f += 1
+			hc = HandVal[c+1]
+		elif (HandVal[c+1] - HandVal[c]) > 1:
+			f = 0
+	if f >= 4:
+		res = StraightFlushVal + hc
+
 	return res
 
 def RoyalFlush(HandVal, HandType):
 	res = 0
-	if HandType[0] == HandType[1] == HandType[2] == HandType[3] == HandType[4]:
-		if HandVal[0] == 14 or HandVal[1] == 14 or HandVal[2] == 14 or HandVal[3] == 14 or HandVal[4] == 14:
-			if HandVal[0] == 13 or HandVal[1] == 13 or HandVal[2] == 13 or HandVal[3] == 13 or HandVal[4] == 13:
-				if HandVal[0] == 12 or HandVal[1] == 12 or HandVal[2] == 12 or HandVal[3] == 12 or HandVal[4] == 12:
-					if HandVal[0] == 11 or HandVal[1] == 11 or HandVal[2] == 11 or HandVal[3] == 11 or HandVal[4] == 11:
-						if HandVal[0] == 10 or HandVal[1] == 10 or HandVal[2] == 10 or HandVal[3] == 10 or HandVal[4] == 10:
-							res = RoyalFlushVal
+	sf = StraightFlush(HandVal, HandType)
+	if sf != 0 and sf - StraightFlushVal == 14:
+		res = RoyalFlushVal
 	return res
 
 	
-def WinCond(pl1_Card1, pl1_Card2, pl2_Card1, pl2_Card2):
-	cond = 0.0
-	pl1_h = HightCard(pl1_Card1, pl1_Card2)
-	pl2_h = HightCard(pl2_Card1, pl2_Card2)
-
-	pl1_p = Pair(pl1_Card1, pl1_Card2)
-	pl2_p = Pair(pl2_Card1, pl2_Card2)
-
-	if pl1_p != 0 or pl2_p != 0:
-		if pl1_p > pl2_p:
-			cond = 1.0
-	else:
-		if pl1_h > pl2_h:
-			cond = 1.0
-	return cond
